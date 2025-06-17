@@ -53,19 +53,17 @@ for i in range(num_righe):
 # Generate CSV
 if st.button('Genera CSV Modifiche'):
     buf = io.StringIO()
-    # Use no quoting and escape spaces
     writer = csv.writer(buf, quoting=csv.QUOTE_NONE, escapechar='\\')
-    # Write header
+    # Scrivi header
     writer.writerow(header_modifica)
-    # Write each row, escaping spaces in each field
     for m in modifiche:
         row = [str(m.get(field, '')) for field in header_modifica]
-        # Escape spaces by prefixing with backslash
-        escaped = [val.replace(' ', '\\ ') for val in row]
-        writer.writerow(escaped)
+        # Avvolgi tra virgolette se contiene spazi
+        processed = [f'"{val}"' if ' ' in val else val for val in row]
+        writer.writerow(processed)
     buf.seek(0)
 
-    # Show preview
+    # Anteprima
     df = pd.DataFrame(modifiche, columns=header_modifica)
     st.dataframe(df)
 
