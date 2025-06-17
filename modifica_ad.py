@@ -52,11 +52,18 @@ for i in range(num_righe):
 
 # Generate CSV
 if st.button('Genera CSV Modifiche'):
-    buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=header_modifica, extrasaction='ignore')
-    writer.writeheader()
-    writer.writerows(modifiche)
-    buffer.seek(0)
+    buf = io.StringIO()
+    # Use no quoting and escape spaces
+    writer = csv.writer(buf, quoting=csv.QUOTE_NONE, escapechar='\\')
+    # Write header
+    writer.writerow(header_modifica)
+    # Write each row, escaping spaces in each field
+    for m in modifiche:
+        row = [str(m.get(field, '')) for field in header_modifica]
+        # Escape spaces by prefixing with backslash
+        escaped = [val.replace(' ', '\\ ') for val in row]
+        writer.writerow(escaped)
+    buf.seek(0)
 
     # Show preview
     df = pd.DataFrame(modifiche, columns=header_modifica)
@@ -76,7 +83,7 @@ Grazie
     # Download
     st.download_button(
         label='📥 Scarica CSV Modifiche',
-        data=buffer.getvalue(),
+        data=buf.getvalue(),
         file_name=file_name,
         mime='text/csv'
     )
